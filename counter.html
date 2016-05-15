@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/redux/3.0.5/redux.min.js"></script>
+  <title>JS Bin</title>
+</head>
+<body>
+<script id="jsbin-source-javascript" type="text/javascript">/* jshint esnext: true */
+const counter = (state = 0, action) => {
+  switch (action.type) {
+    case 'INCREMENT':
+        return state + 1;
+    case 'DECREMENT':
+        return state - 1;
+    default: 
+        return state;
+  }
+};
+const {createStore} = Redux;
+const store = createStore(counter);
+  
+const render = () => {
+  document.body.innerText = store.getState();
+};
+  
+  store.subscribe(render);
+  render();
+  
+  document.addEventListener('click', ()=> {
+    store.dispatch({type :'INCREMENT'});
+  });
+</script></body>
+</html>
