@@ -43,32 +43,12 @@ const visibilityFilter = (state = 'SHOW_ALL', action) => {
   }
 };
 
-const combineReducers = (reducers) => {
-  return (state = {}, action) => {
-    return Object.keys(reducers).reduce((nextState, key) => {
-      nextState[key] = reducers[key](state[key], action);
-      return nextState;
-    }, {})
-  };
-};
+const {combineReducers} = Redux;
 
 const todoApp = combineReducers({
   todos,
   visibilityFilter
 });
-
-// const todoApp = (state = {}, action) => {
-//   return {
-//     todos: todos(
-//       state.todos,
-//       action
-//     ),
-//     visibilityFilter: visibilityFilter(
-//       state.visibilityFilter,
-//       action
-//     )
-//   }
-// };
 
 const {createStore} = Redux;
 const store = createStore(todoApp);
@@ -78,6 +58,44 @@ store.dispatch({
   filter: 'SHOW_COMPLETED'
 });
 
+const {Component} = React;
+
+let nextTodoId = 0;
+class TodoApp extends Component {
+  render() {
+    return (
+      <div>
+        <input type="text" ref={node => {this.input = node;}} />
+        <button onClick={()=> {
+          store.dispatch({
+            type: 'ADD_TODO',
+            text: this.input.value,
+            id: nextTodoId++
+          });
+          this.input.value = '';
+        }}>
+          Add Todo
+        </button>
+        <ul>
+          {this.props.todos.map(todo =>
+            <li key={todo.id}>
+              {todo.text}
+            </li>
+          )}
+        </ul>
+      </div>
+    )}
+}
+
+const render = () => {
+  ReactDOM.render(
+    <TodoApp todos={store.getState().todos} />,
+    document.getElementById('root')
+  );
+};
+
+store.subscribe(render);
+render();
 
 
 
