@@ -55,32 +55,66 @@ const store = createStore(todoApp);
 
 const {Component} = React;
 
-const FilterLink = ({filter, currentFilter, children, onFilterClick}) => {
-  if(filter === currentFilter) {
+const Link = ({active, children, onClick}) => {
+  if(active) {
       return <span>{children}</span>
   }
 
   return (
     <a href="#" onClick={e=> {
       e.preventDefault();
-      onFilterClick(filter);
-    }}>{children}</a>
+      onClick();
+    }}
+    >
+      {children}
+    </a>
   );
 };
 
-const Footer = ({visibilityFilter, onFilterClick}) => (
+class FilterLink extends Component {
+  componentDidMount() {
+    this.unsubscribe = store.subscribe(()=> {
+      this.forceUpdate()
+    });
+  }
+
+  componentWillUnmount() {
+    this.unsubscribe();
+  }
+
+  render() {
+    const props = this.props;
+    const state = store.getState();
+
+    return (
+      <Link
+        active={props.filter === state.visibilityFilter}
+        onClick={() =>
+          store.dispatch({
+            type: 'SET_VISIBILITY_FILTER',
+            filter: props.filter
+          })
+        }
+      >
+        {props.children}
+      </Link>
+    )
+  }
+}
+
+const Footer = () => (
   <p>
     Show:
     {' '}
-    <FilterLink filter='SHOW_ALL' currentFilter={visibilityFilter} onClick={onFilterClick}>
+    <FilterLink filter='SHOW_ALL'>
       All
     </FilterLink>
     {' '}
-    <FilterLink filter='SHOW_ACTIVE' currentFilter={visibilityFilter} onClick={onFilterClick}>
+    <FilterLink filter='SHOW_ACTIVE'>
       Active
     </FilterLink>
     {' '}
-    <FilterLink filter='SHOW_COMPLETED' currentFilter={visibilityFilter} onClick={onFilterClick}>
+    <FilterLink filter='SHOW_COMPLETED'>
       Completed
     </FilterLink>
   </p>
@@ -155,15 +189,7 @@ const TodoApp = ({todos, visibilityFilter}) => (
       todos={getVisibleTodos(todos, visibilityFilter)}
       onTodoClick={id => store.dispatch({type: 'TOGGLE_TODO', id})}
     />
-    <Footer
-      visibilityFIlter={visibilityFilter}
-      onFilterClick={filter =>
-        store.dispatch({
-          type: 'SET_VISIBILITY_FILTER',
-          filter
-        })
-      }
-    />
+    <Footer />
   </div>
 );
 
